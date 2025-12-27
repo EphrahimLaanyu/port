@@ -127,10 +127,7 @@ const Hero = () => {
 
 
         {/* Right: Live Clock */}
-        <div className="meta-reveal flex flex-col items-end text-right">
-          <span className="tabular-nums">{time}</span>
-          <span className="text-[#4a0404]">Nairobi, KE</span>
-        </div>
+     
       </div>
 
 

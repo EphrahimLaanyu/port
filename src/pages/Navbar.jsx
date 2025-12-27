@@ -1,196 +1,178 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import gsap from 'gsap';
 
-// ==============================================
-// 1. HELPER: SCRAMBLE TEXT
-// ==============================================
-const ScrambleText = ({ text, trigger }) => {
-  const [display, setDisplay] = useState(text);
-  
-  useEffect(() => {
-    if (!trigger) {
-      setDisplay(text);
-      return;
-    }
-    
-    let chars = "0123456789";
-    let iterations = 0;
-    const interval = setInterval(() => {
-      setDisplay(
-        text
-          .split("")
-          .map((letter, index) => {
-            if (index < iterations) return text[index];
-            return chars[Math.floor(Math.random() * 10)];
-          })
-          .join("")
-      );
-      if (iterations >= text.length) clearInterval(interval);
-      iterations += 1 / 3;
-    }, 30);
-    
-    return () => clearInterval(interval);
-  }, [trigger, text]);
-
-  return <span>{display}</span>;
-};
-
-// ==============================================
-// 2. COMPONENT: NAV NODE (The Tick & Label)
-// ==============================================
-const NavNode = ({ label, sub, index, total }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const tickRef = useRef(null);
-  const textRef = useRef(null);
-
-  useEffect(() => {
-    // GSAP Animation Logic
-    if (isHovered) {
-      // HOVER STATE: Tick grows red, Text moves down slightly and turns red
-      gsap.to(tickRef.current, { 
-        height: 24, 
-        backgroundColor: "#4a0404", 
-        duration: 0.4, 
-        ease: "power2.out" 
-      });
-      gsap.to(textRef.current, { 
-        y: 5, // Moves slightly down for emphasis
-        opacity: 1, 
-        color: "#4a0404",
-        duration: 0.4, 
-        ease: "power2.out" 
-      });
-    } else {
-      // IDLE STATE: Tick shrinks, Text returns to neutral position and gray
-      gsap.to(tickRef.current, { 
-        height: 8, 
-        backgroundColor: "#1a1a1a", 
-        duration: 0.4, 
-        ease: "power2.out" 
-      });
-      gsap.to(textRef.current, { 
-        y: 0, 
-        opacity: 0.5, // Semi-transparent when idle
-        color: "#1a1a1a",
-        duration: 0.3, 
-        ease: "power2.in" 
-      });
-    }
-  }, [isHovered]);
-
-  // Calculate position percentage
-  const position = `${((index + 1) / (total + 1)) * 100}%`;
-
-  return (
-    <div
-      className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center cursor-pointer group z-50"
-      style={{ left: position }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-        {/* The Clickable Area */}
-        <div className="absolute w-12 h-20 -top-10"></div>
-
-        {/* The Tick Mark */}
-        <div ref={tickRef} className="w-[1px] h-2 bg-[#1a1a1a] origin-center transition-colors"></div>
-
-        {/* The Label (Now Visible) */}
-        <div 
-          ref={textRef} 
-          className="absolute top-4 flex flex-col items-center whitespace-nowrap opacity-50"
-        >
-            <span className="font-serif italic text-lg leading-none transition-colors duration-300">
-                {label}
-            </span>
-            <span className="font-mono text-[8px] tracking-widest uppercase mt-1">
-                  COORD <ScrambleText text={sub} trigger={isHovered} />
-            </span>
-        </div>
-    </div>
-  );
-};
-
-// ==============================================
-// 3. MAIN NAVBAR COMPONENT
-// ==============================================
-
 const Navbar = () => {
-  const lineRef = useRef(null);
-  const trackerRef = useRef(null);
-  
-  const menuItems = [
-    { label: "Index", sub: "01.04" },
-    { label: "Projects", sub: "12.08" },
-    { label: "Maison", sub: "88.21" },
-    { label: "Contact", sub: "00.00" }
-  ];
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCondensed, setIsCondensed] = useState(false);
+  const [localTime, setLocalTime] = useState("");
 
-  // 1. Intro Animation
-  useEffect(() => {
-    gsap.fromTo(lineRef.current,
-      { scaleX: 0 },
-      { scaleX: 1, duration: 1.5, ease: "power4.out", delay: 0.5 }
-    );
-  }, []);
+  const navRef = useRef(null);
+  const menuOverlayRef = useRef(null);
+  const brandRef = useRef(null);
+  const actionsRef = useRef(null);
+  const indicatorRef = useRef(null);
 
-  // 2. Mouse Tracker Logic
+  // 1. CLOCK & SCROLL SENSOR
   useEffect(() => {
-    const handleMouseMove = (e) => {
-       if (!trackerRef.current) return;
-       gsap.to(trackerRef.current, {
-         x: e.clientX,
-         duration: 0.6,
-         ease: "power2.out"
-       });
+    const handleScroll = () => {
+      setIsCondensed(window.scrollY > 40);
     };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+
+    const timer = setInterval(() => {
+      const now = new Date();
+      setLocalTime(now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+    }, 1000);
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearInterval(timer);
+    };
   }, []);
+
+  // 2. THE LIQUID DOCK ANIMATION (With increased scale)
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      if (isCondensed) {
+        const tl = gsap.timeline({ defaults: { ease: "expo.inOut", duration: 1.2 } });
+
+        tl.to(navRef.current, {
+          width: "auto",
+          minWidth: "550px", // ENSURES THE DOCK IS SUBSTANTIAL
+          padding: "12px 32px", // MORE GENEROUS PADDING
+          backgroundColor: "rgba(255, 255, 255, 0.6)", 
+          backdropFilter: "blur(20px) saturate(160%)",
+          borderRadius: "100px",
+          y: 20,
+          border: "1px solid rgba(74, 4, 4, 0.25)",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.15)",
+        })
+        .to(brandRef.current, { scale: 0.9, duration: 1 }, "-=1")
+        .to(indicatorRef.current, { opacity: 1, x: 0, duration: 0.8 }, "-=0.5") // SHOW SECTION DATA
+        .to(actionsRef.current, { gap: "32px", duration: 1 }, "-=1");
+
+      } else {
+        const tl = gsap.timeline({ defaults: { ease: "expo.inOut", duration: 1.2 } });
+
+        tl.to(navRef.current, {
+          width: "100%",
+          minWidth: "100%",
+          padding: "32px 48px",
+          backgroundColor: "transparent",
+          backdropFilter: "blur(0px)",
+          borderRadius: "0px",
+          y: 0,
+          border: "0px solid transparent",
+          boxShadow: "none",
+        })
+        .to(brandRef.current, { scale: 1, duration: 1 }, "-=1")
+        .to(indicatorRef.current, { opacity: 0, x: -20, duration: 0.5 }, "-=1")
+        .to(actionsRef.current, { gap: "40px", duration: 1 }, "-=1");
+      }
+    }, navRef);
+    return () => ctx.revert();
+  }, [isCondensed]);
+
+  // 3. CURTAIN REVEAL
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      if (isMenuOpen) {
+        gsap.to(menuOverlayRef.current, {
+          clipPath: "circle(150% at 90% 10%)",
+          duration: 1.4,
+          ease: "expo.inOut"
+        });
+      } else {
+        gsap.to(menuOverlayRef.current, {
+          clipPath: "circle(0% at 90% 10%)",
+          duration: 1.2,
+          ease: "expo.inOut"
+        });
+      }
+    }, menuOverlayRef);
+    return () => ctx.revert();
+  }, [isMenuOpen]);
 
   return (
-    <div className="fixed top-12 left-0 w-full z-[100] px-12 pointer-events-none mix-blend-darken">
-      
-      <div className="relative w-full">
-          
-          {/* THE ARCHITECTURAL LINE */}
-          <div ref={lineRef} className="w-full h-[1px] bg-[#1a1a1a] opacity-20 relative origin-center"></div>
+    <>
+      <div className="fixed top-0 left-0 w-full flex justify-center z-[1000] pointer-events-none px-4">
+        <nav 
+          ref={navRef}
+          className="relative flex items-center justify-between pointer-events-auto transition-all"
+          style={{ width: "100%", padding: "32px 48px" }}
+        >
+          {/* BRAND CLUSTER */}
+          <div ref={brandRef} className="group flex items-center gap-6 cursor-pointer origin-left">
+            <div className="flex flex-col">
+              <h1 className="font-serif text-2xl tracking-tighter uppercase text-[#4a0404] font-bold">
+                J&E Maison
+              </h1>
+              <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-widest text-[#1a1a1a]">
+                <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse"></span>
+                <span className="opacity-60 tabular-nums">{localTime}</span>
+              </div>
+            </div>
 
-          {/* THE MOUSE TRACKER */}
-          <div
-             ref={trackerRef}
-             className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-[#4a0404] rounded-full -ml-[0.75px] pointer-events-none opacity-80"
-             style={{ left: 0 }}
-          ></div>
-
-          {/* LEFT ANCHOR (Logo) */}
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 pr-4 pointer-events-auto cursor-pointer group">
-              <span className="font-mono text-[9px] font-bold tracking-widest opacity-100 group-hover:opacity-50 transition-opacity">M—S</span>
+            {/* CONDENSED ONLY DATA: SECTION INDICATOR */}
+            <div 
+              ref={indicatorRef} 
+              className="hidden md:flex flex-col border-l border-[#4a0404]/20 pl-6 opacity-0 -translate-x-5"
+            >
+              <span className="font-mono text-[8px] uppercase tracking-[0.3em] opacity-40">Section</span>
+              <span className="font-serif italic text-sm text-[#4a0404]">01 / 03</span>
+            </div>
           </div>
 
-          {/* RIGHT ANCHOR (Menu Trigger) */}
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 pl-4 pointer-events-auto cursor-pointer group">
-             {/* Hamburger Icon */}
-             <div className="flex flex-col gap-1 items-end">
-                <div className="w-4 h-[1px] bg-[#1a1a1a] group-hover:w-6 transition-all duration-300"></div>
-                <div className="w-3 h-[1px] bg-[#1a1a1a] group-hover:w-6 transition-all duration-300 delay-75"></div>
-             </div>
-          </div>
+          {/* ACTION CLUSTER */}
+          <div ref={actionsRef} className="flex items-center gap-10 origin-right transition-all">
+            <button className="group relative overflow-hidden px-8 py-2.5 border border-[#4a0404]/30 rounded-full bg-white/40 backdrop-blur-md">
+              <span className="relative z-10 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#1a1a1a] group-hover:text-white transition-colors duration-500">
+                Inquiry
+              </span>
+              <div className="absolute inset-0 bg-[#4a0404] translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-[cubic-bezier(0.85,0,0.15,1)]"></div>
+            </button>
 
-          {/* NAV NODES */}
-          <div className="pointer-events-auto">
-             {menuItems.map((item, index) => (
-                <NavNode 
-                   key={index} 
-                   label={item.label} 
-                   sub={item.sub}
-                   index={index}
-                   total={menuItems.length}
-                />
-             ))}
+            <button 
+              onClick={() => setIsMenuOpen(true)}
+              className="flex flex-col items-end gap-1.5 group cursor-pointer py-2"
+            >
+              <div className="w-10 h-[2px] bg-[#4a0404] transition-all duration-500 group-hover:w-14"></div>
+              <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#4a0404]">
+                Menu
+              </span>
+            </button>
           </div>
-
+        </nav>
       </div>
-    </div>
+
+      {/* FULL-SCREEN OVERLAY (CURTAIN) */}
+      <div 
+        ref={menuOverlayRef}
+        className="fixed inset-0 bg-[#4a0404] z-[2000] flex flex-col justify-center p-12 md:p-24"
+        style={{ clipPath: "circle(0% at 90% 10%)" }}
+      >
+        <button 
+          onClick={() => setIsMenuOpen(false)}
+          className="absolute top-12 right-12 font-mono text-[10px] uppercase tracking-[0.4em] text-[#EAE8E4]/50 hover:text-white transition-colors"
+        >
+          [ EXIT_PORTAL ]
+        </button>
+
+        <div className="flex flex-col gap-4">
+          {['Index', 'Work', 'Philosophy', 'Contact'].map((item) => (
+            <div key={item} className="overflow-hidden group">
+              <a 
+                href={`#${item.toLowerCase()}`}
+                onClick={() => setIsMenuOpen(false)}
+                className="block font-serif italic text-[12vw] md:text-[8vw] leading-none text-[#EAE8E4] transition-all duration-700 hover:pl-12 hover:opacity-40"
+              >
+                {item}
+              </a>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
   );
 };
 
