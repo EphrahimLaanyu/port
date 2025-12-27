@@ -1,7 +1,13 @@
 import React, { useLayoutEffect, useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
+import ScrollTrigger from 'gsap/ScrollTrigger';
 
-// --- UTILITIES ---
+gsap.registerPlugin(ScrollTrigger);
+
+// ==============================================
+// 1. UTILITIES & HELPER COMPONENTS
+// ==============================================
+
 const useScramble = (text) => {
   const [display, setDisplay] = useState(text);
   useEffect(() => {
@@ -26,7 +32,6 @@ const CipherText = ({ text, className }) => {
   return <span className={className}>{scrambled}</span>;
 };
 
-// --- COMPONENTS ---
 const PrecisionCursor = () => {
   const cursorRef = useRef(null);
   useEffect(() => {
@@ -50,7 +55,37 @@ const PrecisionCursor = () => {
   );
 };
 
-// --- 3D DEEP LETTER ---
+const MagneticNav = ({ children }) => {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    const handleMouseMove = (e) => {
+      const { clientX, clientY } = e;
+      const { left, top, width, height } = el.getBoundingClientRect();
+      const x = (clientX - (left + width / 2)) * 0.3; 
+      const y = (clientY - (top + height / 2)) * 0.3;
+      gsap.to(el, { x, y, duration: 0.5, ease: "power3.out" });
+    };
+    const handleMouseLeave = () => {
+      gsap.to(el, { x: 0, y: 0, duration: 1, ease: "elastic.out(1, 0.3)" });
+    };
+    el.addEventListener("mousemove", handleMouseMove);
+    el.addEventListener("mouseleave", handleMouseLeave);
+    return () => {
+      el.removeEventListener("mousemove", handleMouseMove);
+      el.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []);
+  return <div ref={ref} className="relative p-2 cursor-pointer inline-block">{children}</div>;
+};
+
+const GlassCard = ({ children, className }) => (
+  <div className={`backdrop-blur-sm bg-white/40 border border-white/50 shadow-sm rounded-md ${className}`}>
+    {children}
+  </div>
+);
+
+// --- 3D DEEP LETTER COMPONENT (For Hero) ---
 const DeepLetter = ({ char, className }) => {
   const layers = [...Array(10)]; 
   return (
@@ -82,6 +117,10 @@ const DeepLetter = ({ char, className }) => {
     </div>
   );
 };
+
+// ==============================================
+// 2. HERO COMPONENT
+// ==============================================
 
 const Hero = () => {
   const container = useRef(null);
@@ -209,4 +248,141 @@ const Hero = () => {
   );
 };
 
-export default Hero;
+// ==============================================
+// 3. ABOUT COMPONENT
+// ==============================================
+
+const About = () => {
+  return (
+    <div className="relative w-full h-screen overflow-hidden text-[#1a1a1a] flex items-center justify-center">
+      
+      {/* COPY BACKGROUND GRID (Seamless Transition) */}
+      <div className="absolute inset-0 pointer-events-none z-0 flex flex-col justify-between overflow-hidden">
+         {[...Array(40)].map((_, i) => (
+             <div key={`h-${i}`} className={`w-full origin-left ${i % 6 === 0 ? 'h-[1px] bg-[#4a0404]/30' : 'h-[1px] bg-[#1a1a1a]/5'}`}></div>
+         ))}
+         <div className="absolute inset-0 flex justify-between">
+            {[...Array(60)].map((_, i) => (
+                <div key={`v-${i}`} className={`h-full origin-top ${i % 6 === 0 ? 'w-[1px] bg-[#4a0404]/30' : 'w-[1px] bg-[#1a1a1a]/5'}`}></div>
+            ))}
+         </div>
+      </div>
+
+      <div className="relative z-10 max-w-6xl w-full px-8 flex flex-col md:flex-row items-center gap-12">
+        
+        {/* LEFT: THE HEADLINE */}
+        <div className="flex-1">
+            <div className="flex items-baseline">
+                {/* THE EMPTY SPACE for the 'E'.
+                   The 'E' from Hero will animate exactly into this spot.
+                   Width is approx 18vw * 0.8 (scaled) ~ 14vw
+                */}
+                <div className="w-[14vw] h-[14vw] flex-shrink-0 relative">
+                   {/* Ghost E for alignment (Hidden, helps you visualize) */}
+                   {/* <h1 className="font-serif text-[18vw] leading-none opacity-10">E</h1> */}
+                </div>
+                
+                {/* THE REST OF THE WORD */}
+                <h1 className="font-serif text-[10vw] leading-none tracking-tighter text-[#1a1a1a]">
+                   LEVATED
+                </h1>
+            </div>
+            
+            <div className="mt-8 ml-[14vw]">
+                <GlassCard className="p-8 inline-block max-w-md">
+                    <h3 className="font-mono text-xs text-[#4a0404] tracking-[0.3em] uppercase mb-4">The Methodology</h3>
+                    <p className="font-serif text-xl italic leading-relaxed opacity-80">
+                        "We don't just write code. We orchestrate digital physics. J&E Maison represents the intersection of structural engineering and high-fashion aesthetics."
+                    </p>
+                </GlassCard>
+            </div>
+        </div>
+
+        {/* RIGHT: IMAGE / CONTENT */}
+        <div className="flex-1 h-[60vh] relative group">
+             {/* A placeholder for a high-end image */}
+             <div className="w-full h-full bg-[#1a1a1a] relative overflow-hidden">
+                 <div className="absolute inset-0 bg-[#4a0404] opacity-20 group-hover:opacity-0 transition-opacity duration-700"></div>
+                 <div className="absolute inset-0 border-[1px] border-white/20 m-4"></div>
+                 
+                 {/* Technical markers */}
+                 <div className="absolute top-8 right-8 font-mono text-[10px] text-white tracking-widest">
+                     IMG_REF_02
+                 </div>
+                 
+                 {/* Center text */}
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                     <div className="w-32 h-32 rounded-full border border-white/20 animate-spin-slow"></div>
+                 </div>
+             </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+// ==============================================
+// 4. MAIN HOMEPAGE (The Orchestrator)
+// ==============================================
+
+const HomePage = () => {
+  const container = useRef(null);
+
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      
+      // 1. HORIZONTAL SCROLL LOGIC
+      // We pin the container and move it X: -100vw (to show the second page)
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: container.current,
+          start: "top top",
+          end: "+=2000", // The length of the scroll interaction
+          scrub: 1,      // Smooth scrubbing
+          pin: true,     // Pin the page while scrolling
+        }
+      });
+
+      // Move the whole world to the left
+      tl.to(container.current, {
+        xPercent: -50, // Moves -100vw (since container is 200vw wide)
+        ease: "none",
+      });
+
+      // 2. THE "E" CONNECTION ANIMATION
+      // While the world moves Left, we move the "E" Right so it stays in view
+      // Then we slot it into the "About" headline.
+      
+      // Target the "E" container in Hero
+      tl.to(".deep-e-container", {
+        x: "35vw", // Move it right relative to Hero to land in About
+        y: "5vh",  // Slight adjustment to align with About text
+        scale: 0.8, // Scale down slightly for the new headline
+        rotationY: 180, // Spin it for flair? Or keep it stable. Let's keep stable.
+        ease: "power1.inOut"
+      }, 0); // Start at same time as scroll
+
+    }, container);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <div className="overflow-x-hidden bg-[#F4F4F0]">
+      {/* The Container is 200vw Wide (2 Screens). 
+         We slide this container leftwards.
+      */}
+      <div ref={container} className="flex w-[200vw] h-screen">
+        <div className="w-screen h-screen flex-shrink-0">
+          <Hero />
+        </div>
+        <div className="w-screen h-screen flex-shrink-0">
+          <About />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default HomePage;
