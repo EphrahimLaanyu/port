@@ -1,91 +1,70 @@
-import React, { useLayoutEffect, useRef, useEffect } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
-import ScrollTrigger from 'gsap/ScrollTrigger';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// Import the separated components
+// Components
+import Navbar from './Navbar';
 import Hero from './Hero';
 import About from './About';
-import Navbar from './Navbar';
+import WorkPreview from './WorkPreview';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// ==============================================
-// GLOBAL HELPER COMPONENTS
-// ==============================================
-
-const PrecisionCursor = () => {
-  const cursorRef = useRef(null);
-  useEffect(() => {
-    const moveCursor = (e) => {
-      gsap.to(cursorRef.current, { x: e.clientX, y: e.clientY, duration: 0.1, ease: "power2.out" });
-    };
-    window.addEventListener("mousemove", moveCursor);
-    return () => window.removeEventListener("mousemove", moveCursor);
-  }, []);
-  return (
-    <div ref={cursorRef} className="fixed top-0 left-0 w-3 h-3 bg-[#4a0404] rounded-full pointer-events-none z-[100] -translate-x-1/2 -translate-y-1/2 mix-blend-multiply">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full animate-ping opacity-20 bg-[#4a0404] rounded-full"></div>
-    </div>
-  );
-};
-
-const GrainTexture = () => {
-  return (
-    <div className="fixed inset-0 z-[50] pointer-events-none opacity-40 mix-blend-multiply">
-      <svg className='w-full h-full opacity-60'>
-        <filter id='noiseFilter'>
-          <feTurbulence 
-            type='fractalNoise' 
-            baseFrequency='0.8' 
-            numOctaves='3' 
-            stitchTiles='stitch'/>
-        </filter>
-        <rect width='100%' height='100%' filter='url(#noiseFilter)' />
-      </svg>
-    </div>
-  );
-};
-
-// ==============================================
-// MAIN HOMEPAGE (Scroll Orchestrator)
-// ==============================================
-
 const HomePage = () => {
-  const container = useRef(null);
+  const scrollContainer = useRef(null);
 
   useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
+    let ctx = gsap.context(() => {
+      const sections = gsap.utils.toArray(".panel");
       
-      // Horizontal Scroll Logic
-      gsap.to(container.current, {
-        xPercent: -50, // Move container left by 50%
+      gsap.to(sections, {
+        xPercent: -100 * (sections.length - 1),
         ease: "none",
         scrollTrigger: {
-          trigger: container.current,
-          pin: true,     
-          scrub: 1,      
-          end: "+=2000", 
+          trigger: scrollContainer.current,
+          pin: true,
+          scrub: 1,
+          snap: 1 / (sections.length - 1),
+          // We set the end value to create a smooth scroll distance
+          end: () => "+=" + (scrollContainer.current.offsetWidth)
         }
       });
-
-    }, container);
-
+    }, scrollContainer);
     return () => ctx.revert();
   }, []);
 
   return (
-    <div className="overflow-x-hidden bg-[#EAE8E4] text-[#1a1a1a]">
-      <PrecisionCursor />
+    <div className="relative overflow-hidden bg-[#EAE8E4]">
       
-      {/* FIXED GRAIN OVERLAY */}
-      <GrainTexture />
-      <Navbar/>
-      
-      {/* The 200vw Container holding both pages side-by-side */}
-      <div ref={container} className="flex w-[200vw] h-screen will-change-transform">
-        <Hero />
-        <About />
+      {/* NAVBAR: Placed outside the flex container 
+          so it stays fixed at the top of the viewport.
+      */}
+      <Navbar />
+
+      <div ref={scrollContainer}>
+        {/* HORIZONTAL WRAPPER: 
+            The width must be 100vw * Number of Sections (300vw).
+        */}
+        <div className="flex w-[300vw] h-screen overflow-hidden">
+          
+          {/* SECTION 1: HERO */}
+          <section className="panel w-screen h-screen flex-shrink-0 relative">
+            <Hero />
+          </section>
+
+          {/* SECTION 2: ABOUT */}
+          <section className="panel w-screen h-screen flex-shrink-0 relative">
+            <About />
+          </section>
+
+          {/* SECTION 3: WORK PREVIEW */}
+          <section className="panel w-screen h-screen flex-shrink-0 relative">
+            <WorkPreview />
+          </section>
+
+        </div>
       </div>
+      
     </div>
   );
 };
