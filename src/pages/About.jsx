@@ -1,75 +1,51 @@
 import React from 'react';
 
-// Reusing simple components for consistency
-const GlassCard = ({ children, className }) => (
-  <div className={`backdrop-blur-sm bg-white/40 border border-white/50 shadow-sm rounded-md ${className}`}>
-    {children}
-  </div>
-);
-
 const About = () => {
   return (
-    <div className="relative w-full h-screen overflow-hidden text-[#1a1a1a] flex items-center justify-center">
+    <div className="w-screen h-screen flex items-center justify-center relative overflow-hidden bg-[#EAE8E4] border-l border-[#1a1a1a]/10">
       
-      {/* COPY BACKGROUND GRID (Seamless Transition) */}
-      <div className="absolute inset-0 pointer-events-none z-0 flex flex-col justify-between overflow-hidden">
-         {[...Array(40)].map((_, i) => (
-             <div key={`h-${i}`} className={`w-full origin-left ${i % 6 === 0 ? 'h-[1px] bg-[#4a0404]/30' : 'h-[1px] bg-[#1a1a1a]/5'}`}></div>
-         ))}
-         <div className="absolute inset-0 flex justify-between">
-            {[...Array(60)].map((_, i) => (
-                <div key={`v-${i}`} className={`h-full origin-top ${i % 6 === 0 ? 'w-[1px] bg-[#4a0404]/30' : 'w-[1px] bg-[#1a1a1a]/5'}`}></div>
-            ))}
-         </div>
-      </div>
-
-      <div className="relative z-10 max-w-6xl w-full px-8 flex flex-col md:flex-row items-center gap-12">
+      <div className="relative z-10 max-w-7xl w-full px-12 flex flex-col md:flex-row items-center gap-20">
         
-        {/* LEFT: THE HEADLINE */}
-        <div className="flex-1">
-            <div className="flex items-baseline">
-                {/* THE EMPTY SPACE for the 'E'.
-                   The 'E' from Hero will animate exactly into this spot.
-                   Width is approx 18vw * 0.8 (scaled) ~ 14vw
-                */}
-                <div className="w-[14vw] h-[14vw] flex-shrink-0 relative">
-                   {/* Ghost E for alignment (Hidden, helps you visualize) */}
-                   {/* <h1 className="font-serif text-[18vw] leading-none opacity-10">E</h1> */}
-                </div>
-                
-                {/* THE REST OF THE WORD */}
-                <h1 className="font-serif text-[10vw] leading-none tracking-tighter text-[#1a1a1a]">
-                   LEVATED
-                </h1>
-            </div>
+        {/* TEXT SIDE */}
+        <div className="flex-1 relative">
             
-            <div className="mt-8 ml-[14vw]">
-                <GlassCard className="p-8 inline-block max-w-md">
-                    <h3 className="font-mono text-xs text-[#4a0404] tracking-[0.3em] uppercase mb-4">The Methodology</h3>
-                    <p className="font-serif text-xl italic leading-relaxed opacity-80">
-                        "We don't just write code. We orchestrate digital physics. J&E Maison represents the intersection of structural engineering and high-fashion aesthetics."
-                    </p>
-                </GlassCard>
+            {/* Top Border for "Chapter" feel */}
+            <div className="w-full border-t border-[#1a1a1a] opacity-30 mb-2"></div>
+            <div className="w-full border-t border-[#1a1a1a] opacity-80 mb-8"></div>
+
+            <h1 className="font-serif text-[10vw] leading-[0.9] tracking-tighter text-[#1a1a1a]">
+                ELEVATED
+            </h1>
+
+            {/* Bottom Border */}
+            <div className="w-full border-b border-[#1a1a1a] opacity-80 mt-2"></div>
+            <div className="w-full border-b border-[#1a1a1a] opacity-30 mt-1 mb-12"></div>
+
+            <div className="ml-[2vw] pl-8 border-l border-[#4a0404]">
+                <h3 className="font-mono text-xs text-[#4a0404] tracking-[0.3em] uppercase mb-4">Methodology</h3>
+                <p className="font-serif text-2xl italic leading-relaxed opacity-80 max-w-lg">
+                    "We orchestrate digital physics. J&E Maison represents the intersection of structural engineering and high-fashion aesthetics."
+                </p>
             </div>
         </div>
 
-        {/* RIGHT: IMAGE / CONTENT */}
-        <div className="flex-1 h-[60vh] relative group">
-             {/* A placeholder for a high-end image */}
-             <div className="w-full h-full bg-[#1a1a1a] relative overflow-hidden">
-                 <div className="absolute inset-0 bg-[#4a0404] opacity-20 group-hover:opacity-0 transition-opacity duration-700"></div>
-                 <div className="absolute inset-0 border-[1px] border-white/20 m-4"></div>
-                 
-                 {/* Technical markers */}
-                 <div className="absolute top-8 right-8 font-mono text-[10px] text-white tracking-widest">
-                     IMG_REF_02
-                 </div>
-                 
-                 {/* Center text */}
-                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                     <div className="w-32 h-32 rounded-full border border-white/20 animate-spin-slow"></div>
-                 </div>
-             </div>
+        {/* IMAGE SIDE */}
+        <div className="flex-1 flex justify-center items-center">
+            {/* Frame inside a frame */}
+            <div className="relative p-6 border border-[#1a1a1a]/10">
+                {/* Corner markers */}
+                <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#1a1a1a]"></div>
+                <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#1a1a1a]"></div>
+                <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#1a1a1a]"></div>
+                <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#1a1a1a]"></div>
+
+                <div className="h-[40vh] aspect-[3/4] bg-[#1a1a1a]/5 relative flex items-center justify-center overflow-hidden">
+                     <div className="w-full h-[1px] bg-[#4a0404] absolute top-1/2 left-0 opacity-20"></div>
+                     <div className="h-full w-[1px] bg-[#4a0404] absolute top-0 left-1/2 opacity-20"></div>
+                     <div className="w-32 h-32 rounded-full border border-[#4a0404] opacity-50"></div>
+                </div>
+                <p className="mt-4 text-center font-mono text-[10px] tracking-widest opacity-50">PLATE NO. 1</p>
+            </div>
         </div>
 
       </div>

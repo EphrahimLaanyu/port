@@ -1,209 +1,385 @@
-import React, { useLayoutEffect, useRef, useEffect, useState } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
-
-// --- UTILITIES ---
-const useScramble = (text) => {
-  const [display, setDisplay] = useState(text);
-  useEffect(() => {
-    let iteration = 0;
-    const interval = setInterval(() => {
-      setDisplay(
-        text.split("").map((letter, index) => {
-            if (index < iteration) return text[index];
-            return "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[Math.floor(Math.random() * 36)];
-          }).join("")
-      );
-      if (iteration >= text.length) clearInterval(interval);
-      iteration += 1 / 3; 
-    }, 30);
-    return () => clearInterval(interval);
-  }, [text]);
-  return display;
-};
-
-const CipherText = ({ text, className }) => {
-  const scrambled = useScramble(text);
-  return <span className={className}>{scrambled}</span>;
-};
-
-// --- COMPONENTS ---
-const PrecisionCursor = () => {
-  const cursorRef = useRef(null);
-  useEffect(() => {
-    const moveCursor = (e) => {
-      gsap.to(cursorRef.current, { x: e.clientX, y: e.clientY, duration: 0.1, ease: "power2.out" });
-    };
-    const clickAnim = () => {
-      gsap.fromTo(cursorRef.current, { scale: 1 }, { scale: 1.5, duration: 0.1, yoyo: true, repeat: 1 });
-    };
-    window.addEventListener("mousemove", moveCursor);
-    window.addEventListener("mousedown", clickAnim);
-    return () => {
-      window.removeEventListener("mousemove", moveCursor);
-      window.removeEventListener("mousedown", clickAnim);
-    };
-  }, []);
-  return (
-    <div ref={cursorRef} className="fixed top-0 left-0 w-3 h-3 bg-[#4a0404] rounded-full pointer-events-none z-[100] -translate-x-1/2 -translate-y-1/2 mix-blend-multiply">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full animate-ping opacity-20 bg-[#4a0404] rounded-full"></div>
-    </div>
-  );
-};
-
-// --- 3D DEEP LETTER ---
-const DeepLetter = ({ char, className }) => {
-  const layers = [...Array(10)]; 
-  return (
-    <div className={`relative perspective-container ${className}`} style={{ perspective: '1000px' }}>
-      <div className="preserve-3d relative">
-        {layers.map((_, i) => {
-          const isTop = i === 0;
-          const zDepth = i * -15; 
-          return (
-            <h1 
-              key={i}
-              className={`font-serif text-[18vw] leading-none tracking-tighter absolute top-0 left-0 w-full text-center
-                ${isTop ? 'text-stroke z-50' : ''} 
-                ${!isTop ? 'text-[#4a0404] opacity-80 blur-[1px]' : ''}
-              `}
-              style={{
-                transform: `translateZ(${zDepth}px)`,
-                filter: isTop ? 'none' : `brightness(${1 - (i * 0.08)}) blur(${i * 0.5}px)`,
-                zIndex: 50 - i
-              }}
-              data-depth-layer={i} 
-            >
-              {char}
-            </h1>
-          );
-        })}
-      </div>
-      <h1 className="font-serif text-[18vw] leading-none tracking-tighter opacity-0">{char}</h1>
-    </div>
-  );
-};
 
 const Hero = () => {
   const container = useRef(null);
-  const [coords, setCoords] = useState({ x: 0, y: 0 });
+  const centerCluster = useRef(null);
 
-  useEffect(() => {
-    const handle3DMove = (e) => {
-      setCoords({ x: e.clientX, y: e.clientY });
-      const xNorm = (e.clientX / window.innerWidth - 0.5);
-      const yNorm = (e.clientY / window.innerHeight - 0.5);
-
-      gsap.utils.toArray('[data-depth-layer]').forEach((layer) => {
-        const depth = layer.getAttribute('data-depth-layer');
-        if (depth > 0) {
-            gsap.to(layer, {
-                x: (xNorm * 50) * depth,
-                y: (yNorm * 50) * depth,
-                duration: 0.2,
-                ease: "power1.out"
-            });
-        }
-      });
-
-      // Parallax for Ampersand
-      gsap.to(".brand-amp", {
-        x: xNorm * -30,
-        y: yNorm * -30,
-        duration: 1,
-        ease: "power2.out"
-      });
-    };
-
-    window.addEventListener("mousemove", handle3DMove);
-    return () => window.removeEventListener("mousemove", handle3DMove);
-  }, []);
-
+  // ==============================================
+  // GSAP ANIMATION LOGIC
+  // ==============================================
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline();
-      tl.to(container.current, { opacity: 1, duration: 1 });
-      tl.fromTo(".grid-line", { scaleX: 0 }, { scaleX: 1, duration: 1.5, ease: "expo.out", stagger: 0.01 });
-      tl.fromTo(".grid-line-vert", { scaleY: 0 }, { scaleY: 1, duration: 1.5, ease: "expo.out", stagger: 0.01 }, "<");
-      tl.from(".glass-card", { y: 20, autoAlpha: 0, duration: 0.8, stagger: 0.1, ease: "power2.out" }, "-=1");
+      const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+
+      // 1. Intro Sequence
+      tl.to(".marquee-mask", { scaleX: 0, duration: 1.8 })
+        
+        // Reveal J & E (Entry only - no continuous loop)
+        .fromTo(".char-animate", 
+          { y: 120, opacity: 0, rotateX: 25 }, 
+          { y: 0, opacity: 1, rotateX: 0, duration: 1.6, stagger: 0.1 }, 
+          "-=1.5")
       
-      tl.from(".brand-amp", { scale: 0, autoAlpha: 0, duration: 1.5, ease: "elastic.out(1, 0.5)" }, "-=0.5");
-      tl.from(".deep-j-container", { x: -100, autoAlpha: 0, duration: 1.2, ease: "power4.out" }, "-=1.2");
-      tl.from(".deep-e-container", { x: 100, autoAlpha: 0, duration: 1.2, ease: "power4.out" }, "<");
+        // Reveal Maison Block
+        .fromTo(".maison-block",
+          { y: 40, opacity: 0 },
+          { y: 0, opacity: 1, duration: 1.4, ease: "power3.out" },
+          "-=1.0"
+        )
+           
+        // Draw Floor Lines
+        .fromTo(".floor-line", { scaleX: 0 }, { scaleX: 1, duration: 1.5, stagger: 0.2 }, "-=1.0")
+        
+        // Reveal Orbs
+        .fromTo(".pearl-orb", { scale: 0, opacity: 0 }, { scale: 1, opacity: 0.6, duration: 2.5 }, "-=2.5");
+
+      // Note: Continuous floating animation removed as requested.
+
+      // 2. Mouse Parallax (Kept subtle 3D tilt for the whole container)
+      const handleMouseMove = (e) => {
+        const { clientX, clientY, innerWidth, innerHeight } = window;
+        const x = (clientX - innerWidth / 2) / innerWidth;
+        const y = (clientY - innerHeight / 2) / innerHeight;
+        
+        gsap.to(centerCluster.current, {
+          rotationY: x * 8, 
+          rotationX: -y * 8,
+          x: x * 15,
+          y: y * 15,
+          duration: 1,
+          ease: "power2.out"
+        });
+      };
+      window.addEventListener('mousemove', handleMouseMove);
+      return () => window.removeEventListener('mousemove', handleMouseMove);
+
     }, container);
     return () => ctx.revert();
   }, []);
 
   return (
-    <div ref={container} className="relative w-full h-screen overflow-hidden text-[#1a1a1a] opacity-0 cursor-none">
+    <div ref={container} className="hero-container">
       
-      <PrecisionCursor />
+      {/* ==============================================
+          CSS STYLES (VANILLA)
+      ============================================== */}
+      <style>{`
+        /* Reset & Base */
+        * { box-sizing: border-box; }
+        
+        /* Layout */
+        .hero-container {
+          width: 100vw;
+          height: 100vh;
+          background-color: #EAE8E4;
+          overflow: hidden;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          position: relative;
+        }
 
-      <style jsx>{`
-        .text-stroke { -webkit-text-stroke: 2px #1a1a1a; color: transparent; }
-        .preserve-3d { transform-style: preserve-3d; }
-        .perspective-container { perspective: 1000px; }
-        .glass-card {
-          background: rgba(255, 255, 255, 0.4);
-          backdrop-filter: blur(4px);
-          border: 1px solid rgba(255, 255, 255, 0.5);
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
-          border-radius: 4px;
+        /* 3D Perspective Wrapper */
+        .stage-perspective {
+          perspective: 2000px;
+          position: absolute;
+          inset: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .cluster-wrapper {
+          position: relative;
+          width: 100%;
+          max-width: 1200px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          transform-style: preserve-3d;
+          padding-bottom: 2rem;
+        }
+
+        /* Pearl Orbs */
+        .pearl-orb {
+          position: absolute;
+          pointer-events: none;
+          opacity: 0.4;
+          mix-blend-mode: multiply;
+          filter: blur(80px);
+          z-index: -1;
+          border-radius: 50%;
+          background: radial-gradient(circle at center, #dcdcdc 0%, #EAE8E4 60%, transparent 100%);
+        }
+
+        /* Orbiting Ring */
+        .orbit-container {
+          position: absolute;
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          width: 45vw; height: 45vw;
+          pointer-events: none;
+          z-index: 0;
+          mix-blend-mode: multiply;
+        }
+        .orbit-spinner {
+          width: 100%; height: 100%;
+          position: relative;
+          transform-style: preserve-3d;
+          animation: orbit-spin 40s linear infinite;
+        }
+        .orbit-border {
+          position: absolute; inset: 0;
+          border-radius: 50%;
+          border: 1px solid #4a0404;
+          opacity: 0.1;
+        }
+        @keyframes orbit-spin {
+          0% { transform: rotateX(75deg) rotateZ(0deg); }
+          100% { transform: rotateX(75deg) rotateZ(360deg); }
+        }
+
+        /* Marquee */
+        .marquee-container {
+          width: 100%;
+          max-width: 900px;
+          height: 12px;
+          position: relative;
+          display: flex;
+          align-items: center;
+          overflow: hidden;
+          border-top: 1px solid rgba(26, 26, 26, 0.05);
+          border-bottom: 1px solid rgba(26, 26, 26, 0.05);
+          opacity: 0.8;
+          margin-bottom: 3rem;
+        }
+        .marquee-mask {
+          position: absolute; inset: 0;
+          background-color: #EAE8E4;
+          z-index: 20;
+          transform-origin: center;
+        }
+        .marquee-track {
+          display: flex;
+          white-space: nowrap;
+          width: 100%;
+        }
+        .marquee-item {
+          font-family: monospace;
+          font-size: 8px;
+          text-transform: uppercase;
+          letter-spacing: 0.4em;
+          color: #1a1a1a;
+          opacity: 0.3;
+          margin: 0 2rem;
+        }
+        .anim-normal { animation: marquee 20s linear infinite; }
+        .anim-reverse { animation: marquee-rev 20s linear infinite; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        @keyframes marquee-rev { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+
+        /* Typography Cluster (J & E) */
+        .typo-row {
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          width: 100%;
+          user-select: none;
+          position: relative;
+          z-index: 10;
+          gap: 4rem; 
+          margin-bottom: 2rem;
+        }
+        .char-wrapper {
+          position: relative;
+          transform-style: preserve-3d;
+        }
+        
+        /* Updated Luxurious Font */
+        .main-char {
+          font-family: "Didot", "Bodoni MT", "Playfair Display", "Times New Roman", serif;
+          font-size: 14vw;
+          line-height: 0.8;
+          color: #1a1a1a;
+          mix-blend-mode: darken;
+          will-change: transform;
+          font-weight: 400; /* Lighter weight for high-fashion look */
+        }
+        
+        /* Updated Ampersand */
+        .ampersand {
+          font-family: "Didot", "Bodoni MT", "Playfair Display", "Times New Roman", serif;
+          font-style: italic;
+          font-size: 10vw;
+          line-height: 1;
+          color: #4a0404;
+          mix-blend-mode: multiply;
+          filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+          padding-bottom: 1vw;
+          z-index: 20;
+        }
+        
+        .char-label {
+          position: absolute;
+          font-family: monospace;
+          font-size: 9px;
+          opacity: 0.4;
+          letter-spacing: 0.2em;
+        }
+        .label-j { left: -1.5rem; top: 50%; transform: rotate(-90deg); }
+        .label-e { right: -2rem; bottom: 2rem; }
+
+        /* Maison Block */
+        .maison-block {
+          position: relative;
+          z-index: 20;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-bottom: 4rem;
+          opacity: 0; 
+        }
+        .maison-hairline {
+          width: 6rem;
+          height: 1px;
+          background-color: #4a0404;
+          margin-bottom: 1.5rem;
+          opacity: 0.6;
+        }
+        .maison-title {
+          font-family: "Didot", "Bodoni MT", "Playfair Display", serif;
+          font-size: 5rem;
+          color: #1a1a1a;
+          text-transform: uppercase;
+          letter-spacing: 0.25em;
+          line-height: 1;
+          font-weight: 400;
+          mix-blend-mode: darken;
+          text-align: center;
+        }
+        .maison-subtitle {
+          font-family: monospace;
+          font-size: 10px;
+          color: #4a0404;
+          letter-spacing: 0.6em;
+          text-transform: uppercase;
+          margin-top: 1rem;
+          opacity: 0.7;
+          margin-left: 0.6em; 
+        }
+
+        /* Bottom Floor */
+        .floor-container {
+          width: 100%;
+          max-width: 900px;
+          position: relative;
+        }
+        .floor-line {
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+          height: 1px;
+          background-color: #1a1a1a;
+        }
+        .line-1 { top: -2rem; width: 110%; opacity: 0.5; }
+        .line-2 { top: -1rem; width: 90%; opacity: 0.2; }
+
+        /* Responsive Tweaks */
+        @media (max-width: 768px) {
+          .orbit-container { width: 80vw; height: 80vw; }
+          .typo-row { gap: 1rem; }
+          .main-char { font-size: 18vw; }
+          .ampersand { font-size: 14vw; }
+          .maison-title { font-size: 2.5rem; }
         }
       `}</style>
 
-      {/* GRAPH PAPER */}
-      <div className="absolute inset-0 pointer-events-none z-0 flex flex-col justify-between overflow-hidden">
-         {[...Array(40)].map((_, i) => (
-             <div key={`h-${i}`} className={`grid-line w-full origin-left ${i % 6 === 0 ? 'h-[1px] bg-[#4a0404]/30 z-10' : 'h-[1px] bg-[#1a1a1a]/5 z-0'}`}></div>
-         ))}
-         <div className="absolute inset-0 flex justify-between">
-            {[...Array(60)].map((_, i) => (
-                <div key={`v-${i}`} className={`grid-line-vert h-full origin-top ${i % 6 === 0 ? 'w-[1px] bg-[#4a0404]/30 z-10' : 'w-[1px] bg-[#1a1a1a]/5 z-0'}`}></div>
-            ))}
-         </div>
-      </div>
-
-      <div className="relative z-10 w-full h-full flex flex-col justify-between p-8 md:p-12">
+      {/* ==============================================
+          HTML STRUCTURE
+      ============================================== */}
+      <div className="stage-perspective">
         
-        <div className="flex justify-between items-start">
-            <div className="glass-card px-4 py-3 flex flex-col gap-1">
-                <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-[#4a0404] rounded-full"></div>
-                    <span className="font-mono text-[10px] tracking-widest uppercase opacity-60">
-                        FIG 1.0 // <CipherText text="MAISON" />
-                    </span>
-                </div>
+        {/* The 3D Cluster that tilts */}
+        <div ref={centerCluster} className="cluster-wrapper">
+          
+          {/* Background Elements */}
+          <div className="pearl-orb" style={{ width: '70vw', height: '70vw', top: '-5rem', background: '#d4d1cc' }}></div>
+          <div className="pearl-orb" style={{ width: '50vw', height: '50vw', transform: 'translate(20%, 20%)', background: '#e0ded9' }}></div>
+
+          {/* 1. Orbit Ring */}
+          <div className="orbit-container">
+            <div className="orbit-spinner">
+              <div className="orbit-border"></div>
+              <svg width="100%" height="100%" viewBox="0 0 300 300" style={{ position: 'absolute', top: 0, left: 0 }}>
+                <defs>
+                  <path id="circlePath" d="M 150, 150 m -120, 0 a 120,120 0 0,1 240,0 a 120,120 0 0,1 -240,0" />
+                </defs>
+                <text fill="#4a0404" fontSize="6" fontFamily="monospace" letterSpacing="4px" fontWeight="bold" opacity="0.4">
+                  <textPath href="#circlePath" startOffset="0%">
+                    MAISON SYSTEM 2025 • ARCHITECTURAL LOGIC • FIG 1.0 • KINETIC STRUCTURE • 
+                  </textPath>
+                </text>
+              </svg>
             </div>
-            <div className="glass-card px-4 py-3 font-mono text-[10px] tracking-widest text-[#1a1a1a]/60 text-right">
-                <div>LAT: <span className="text-[#4a0404]">{coords.x}</span></div>
-                <div>LON: <span className="text-[#4a0404]">{coords.y}</span></div>
+          </div>
+
+          {/* 2. Top Marquee */}
+          <div className="marquee-container">
+            <div className="marquee-mask"></div>
+            <div className="marquee-track anim-normal">
+              {[...Array(8)].map((_, i) => (
+                <span key={i} className="marquee-item">Fig 1.0 — System — Maison — Structure —</span>
+              ))}
             </div>
+          </div>
+
+          {/* 3. Typography Cluster (J & E) */}
+          <div className="typo-row">
+            {/* J */}
+            <div className="char-wrapper letter-j">
+              <h1 className="main-char char-animate" style={{ transformOrigin: 'bottom right' }}>J</h1>
+              <span className="char-label label-j">FIG. A</span>
+            </div>
+
+            {/* & */}
+            <div className="char-wrapper brand-amp">
+              <h1 className="ampersand char-animate" style={{ transformOrigin: 'bottom' }}>&</h1>
+            </div>
+
+            {/* E */}
+            <div className="char-wrapper letter-e">
+              <h1 className="main-char char-animate" style={{ transformOrigin: 'bottom left' }}>E</h1>
+              <span className="char-label label-e">EST. 25</span>
+            </div>
+          </div>
+
+          {/* 4. Maison Block */}
+          <div className="maison-block">
+            <div className="maison-hairline"></div>
+            <h2 className="maison-title">
+              <span style={{ display: 'block', marginLeft: '0.25em' }}>Maison</span>
+            </h2>
+            <span className="maison-subtitle">System . Structure . Logic</span>
+          </div>
+
+          {/* 5. Bottom Floor & Marquee */}
+          <div className="floor-container">
+            <div className="floor-line line-1"></div>
+            <div className="floor-line line-2"></div>
+            
+            <div className="marquee-container" style={{ marginBottom: 0 }}>
+              <div className="marquee-mask"></div>
+              <div className="marquee-track anim-reverse">
+                {[...Array(8)].map((_, i) => (
+                  <span key={i} className="marquee-item">Fig 1.0 — System — Maison — Structure —</span>
+                ))}
+              </div>
+            </div>
+          </div>
+
         </div>
-
-        {/* CENTER STAGE */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full text-center">
-            <div className="mb-8 flex justify-center">
-               <div className="glass-card px-4 py-1 rounded-full border-[#4a0404]/20">
-                  <p className="font-mono text-[9px] text-[#4a0404] tracking-[0.3em] uppercase">Architecture & Design</p>
-               </div>
-            </div>
-
-            <div className="grid grid-cols-3 items-center justify-items-center w-full max-w-5xl mx-auto select-none perspective-container">
-                <div className="deep-j-container justify-self-end -mr-12 md:-mr-32 z-0"><DeepLetter char="J" /></div>
-                <div className="brand-amp z-20 relative preserve-3d">
-                    <h1 className="font-serif italic text-[12vw] leading-none text-[#4a0404]" style={{ filter: 'drop-shadow(0px 30px 20px rgba(0,0,0,0.3))' }}>&</h1>
-                </div>
-                {/* IMPORTANT: This 'deep-e-container' is what gets animated 
-                   across the screen in HomePage.jsx 
-                */}
-                <div className="deep-e-container justify-self-start -ml-12 md:-ml-32 z-0"><DeepLetter char="E" /></div>
-            </div>
-        </div>
-
-        <div className="flex justify-between items-end">
-             <div className="glass-card px-4 py-2"><p className="font-mono text-[10px] opacity-50 uppercase tracking-widest">Nairobi, KE ©2025</p></div>
-        </div>
-
       </div>
     </div>
   );
