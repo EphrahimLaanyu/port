@@ -17,9 +17,11 @@ const Navbar = () => {
   // 1. DYNAMIC SECTION INDICATOR LOGIC
   const getSectionData = () => {
     switch (location.pathname) {
-      case '/work': return { num: "02 / 03", name: "Work" };
-      case '/about': return { num: "03 / 03", name: "About" };
-      default: return { num: "01 / 03", name: "Home" };
+      case '/work': return { num: "02 / 04", name: "Work" };
+      case '/about': return { num: "03 / 04", name: "About" };
+      case '/about': return { num: "03 / 04", name: "Work" };
+      case '/contact': return { num: "04 / 04", name: "Contact" };
+      default: return { num: "01 / 04", name: "Home" };
     }
   };
 
@@ -185,7 +187,7 @@ const Navbar = () => {
           {[
             { label: 'Index', path: '/' },
             { label: 'Work', path: '/work' },
-            { label: 'Philosophy', path: '/about' },
+            { label: 'About', path: '/about' },
             { label: 'Contact', path: '/contact' }
           ].map((item) => (
             <div key={item.label} className="overflow-hidden group portal-link opacity-0">

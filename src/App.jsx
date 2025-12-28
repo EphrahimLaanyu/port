@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import HomePage from './pages/HomePage';
 import Work from './pages/Work';
 import Contact from './pages/Contact';
+import AboutDetailed from './pages/AboutDetailed';
 
 // ==============================================
 // HELPER: SCROLL TO TOP ON ROUTE CHANGE
@@ -33,6 +34,7 @@ const App = () => {
           {/* THE VERTICAL CINEMATIC FOLIO */}
           <Route path="/work" element={<Work />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<AboutDetailed />} />
 
           {/* FALLBACK: REDIRECT TO HOME */}
           <Route path="*" element={<HomePage />} />
