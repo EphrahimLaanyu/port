@@ -22,10 +22,9 @@ const Contact = () => {
   // --- ANIMATION: ENTRY ---
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // Animate in the active view
       gsap.fromTo(".animate-entry", 
-        { y: 50, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1, stagger: 0.1, ease: "power3.out" }
+        { y: 30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: "power3.out" }
       );
     }, containerRef);
     return () => ctx.revert();
@@ -59,15 +58,13 @@ const Contact = () => {
   };
 
   const switchView = (type) => {
-    // Fade out old view
     gsap.to(containerRef.current, {
         opacity: 0, 
-        duration: 0.5, 
+        duration: 0.3, 
         onComplete: () => {
             setFormType(type);
             setViewState('form');
-            setFormData({}); // Reset data
-            // Fade in new view
+            setFormData({});
             gsap.to(containerRef.current, { opacity: 1, duration: 0.5 });
         }
     });
@@ -76,10 +73,10 @@ const Contact = () => {
   // --- RENDER: SUCCESS ---
   if (viewState === 'success') {
     return (
-      <div className="h-screen w-screen bg-[#0a0a0a] text-[#EAE8E4] flex flex-col items-center justify-center">
+      <div className="min-h-screen w-screen bg-[#0a0a0a] text-[#EAE8E4] flex flex-col items-center justify-center p-6">
         <Navbar />
-        <h1 className="font-serif text-[10vw] italic leading-none text-[#4a0404] mb-8 animate-pulse">Received.</h1>
-        <p className="font-mono text-sm tracking-[0.4em] uppercase opacity-60">The Maison has your brief.</p>
+        <h1 className="font-serif text-6xl md:text-[10vw] italic leading-none text-[#4a0404] mb-8 animate-pulse text-center">Received.</h1>
+        <p className="font-mono text-xs md:text-sm tracking-[0.2em] md:tracking-[0.4em] uppercase opacity-60 text-center">The Maison has your brief.</p>
         <button onClick={() => window.location.reload()} className="mt-12 border-b border-white/30 pb-1 hover:text-[#4a0404] hover:border-[#4a0404] transition-colors font-mono text-xs uppercase tracking-widest">
             Return
         </button>
@@ -90,27 +87,31 @@ const Contact = () => {
   // --- RENDER: SELECTION (The Fork) ---
   if (viewState === 'selection') {
     return (
-      <div ref={containerRef} className="h-screen w-screen bg-[#EAE8E4] text-[#0a0a0a] flex flex-col relative overflow-hidden">
+      <div ref={containerRef} className="min-h-screen w-screen bg-[#EAE8E4] text-[#0a0a0a] flex flex-col relative overflow-x-hidden">
         <Navbar />
         <div className="fixed inset-0 pointer-events-none opacity-[0.06] mix-blend-multiply" style={{ backgroundImage: `url("https://www.transparenttextures.com/patterns/noise-lines.png")` }}></div>
         
-        <div className="flex-1 flex flex-col justify-center items-center gap-12 z-10">
-            <div className="animate-entry text-center mb-12">
-                <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-[#4a0404] mb-4 font-bold">Initialize Protocol</p>
-                <h1 className="font-serif text-5xl md:text-6xl italic">Select Your Path</h1>
+        <div className="flex-1 flex flex-col justify-center items-center gap-12 z-10 px-6 py-20">
+            <div className="animate-entry text-center mb-4 md:mb-12">
+                <p className="font-mono text-[10px] tracking-[0.3em] md:tracking-[0.4em] uppercase text-[#4a0404] mb-4 font-bold">Initialize Protocol</p>
+                <h1 className="font-serif text-4xl md:text-6xl italic">Select Your Path</h1>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-8 md:gap-24">
-                <button onClick={() => switchView('general')} className="animate-entry group text-center">
-                    <div className="text-4xl md:text-5xl font-serif mb-4 group-hover:text-[#4a0404] transition-colors duration-500">Just Saying Hello</div>
-                    <div className="h-[1px] w-0 bg-[#4a0404] mx-auto group-hover:w-full transition-all duration-500"></div>
-                    <span className="block mt-4 font-mono text-[9px] tracking-widest opacity-40 group-hover:opacity-100">01. General Inquiry</span>
+            <div className="flex flex-col md:flex-row gap-12 md:gap-24 w-full md:w-auto">
+                {/* OPTION 1 */}
+                <button onClick={() => switchView('general')} className="animate-entry group text-center w-full md:w-auto">
+                    <div className="text-3xl md:text-5xl font-serif mb-4 group-hover:text-[#4a0404] transition-colors duration-500">Just Saying Hello</div>
+                    <div className="h-[1px] w-12 md:w-0 bg-[#4a0404] mx-auto group-hover:w-full transition-all duration-500"></div>
+                    <span className="block mt-4 font-mono text-[9px] tracking-widest opacity-60 md:opacity-40 group-hover:opacity-100">01. General Inquiry</span>
                 </button>
-                <div className="w-[1px] h-12 bg-[#0a0a0a]/10 hidden md:block animate-entry"></div>
-                <button onClick={() => switchView('service')} className="animate-entry group text-center">
-                    <div className="text-4xl md:text-5xl font-serif mb-4 group-hover:text-[#4a0404] transition-colors duration-500">Start a Project</div>
-                    <div className="h-[1px] w-0 bg-[#4a0404] mx-auto group-hover:w-full transition-all duration-500"></div>
-                    <span className="block mt-4 font-mono text-[9px] tracking-widest opacity-40 group-hover:opacity-100">02. Commission Work</span>
+                
+                <div className="w-full h-[1px] md:w-[1px] md:h-12 bg-[#0a0a0a]/10 animate-entry"></div>
+                
+                {/* OPTION 2 */}
+                <button onClick={() => switchView('service')} className="animate-entry group text-center w-full md:w-auto">
+                    <div className="text-3xl md:text-5xl font-serif mb-4 group-hover:text-[#4a0404] transition-colors duration-500">Start a Project</div>
+                    <div className="h-[1px] w-12 md:w-0 bg-[#4a0404] mx-auto group-hover:w-full transition-all duration-500"></div>
+                    <span className="block mt-4 font-mono text-[9px] tracking-widest opacity-60 md:opacity-40 group-hover:opacity-100">02. Commission Work</span>
                 </button>
             </div>
         </div>
@@ -127,74 +128,79 @@ const Contact = () => {
       <div className="fixed inset-0 pointer-events-none z-0 opacity-[0.06] mix-blend-multiply" 
            style={{ backgroundImage: `url("https://www.transparenttextures.com/patterns/noise-lines.png")` }}></div>
 
-      <div className="relative z-10 pt-32 pb-24 px-6 md:px-12 lg:px-24 min-h-screen flex flex-col justify-center">
+      <div className="relative z-10 pt-28 md:pt-32 pb-24 px-6 md:px-12 lg:px-24 min-h-screen flex flex-col justify-center">
         
         {/* HEADER */}
-        <div className="animate-entry mb-16 border-b border-[#0a0a0a]/10 pb-6 flex justify-between items-end">
-            <span className="font-mono text-[10px] tracking-[0.4em] uppercase text-[#4a0404]">
+        <div className="animate-entry mb-8 md:mb-16 border-b border-[#0a0a0a]/10 pb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <span className="font-mono text-[10px] tracking-[0.3em] md:tracking-[0.4em] uppercase text-[#4a0404]">
                 {formType === 'general' ? '01 // General Inquiry' : '02 // Service Brief'}
             </span>
-            <button onClick={() => setViewState('selection')} className="font-mono text-[9px] uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity">
+            <button onClick={() => setViewState('selection')} className="font-mono text-[9px] uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity border-b border-[#0a0a0a] md:border-none pb-1 md:pb-0">
                 ( Switch Path )
             </button>
         </div>
 
         {/* THE NARRATIVE FORM */}
-        <form onSubmit={submitForm} className="animate-entry max-w-6xl mx-auto leading-relaxed md:leading-[1.6]">
+        {/* Responsive Typography: text-2xl on mobile, scaling up to text-[3.5vw] on desktop */}
+        <form onSubmit={submitForm} className="animate-entry max-w-6xl mx-auto leading-[1.8] md:leading-[1.6]">
             
             {formType === 'general' ? (
                 // --- GENERAL TEMPLATE ---
-                <p className="font-serif text-3xl md:text-[3.5vw] text-[#0a0a0a]">
-                    Hello, my name is
+                <div className="font-serif text-2xl md:text-4xl lg:text-[3.5vw] text-[#0a0a0a]">
+                    <span>Hello, my name is</span>
                     <input 
                         name="full_name" required placeholder="your full name" onChange={handleInput}
-                        className="mx-2 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 w-[300px] text-center"
-                    />.
-                    You can reach me at
+                        className="inline-block w-full md:w-auto md:min-w-[300px] mx-0 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 text-left md:text-center transition-colors mb-2 md:mb-0"
+                    />
+                    <span>. You can reach me at</span>
                     <input 
                         name="email" type="email" required placeholder="email address" onChange={handleInput}
-                        className="mx-2 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 w-[350px] text-center"
-                    />.
-                    I am writing to you today regarding
+                        className="inline-block w-full md:w-auto md:min-w-[350px] mx-0 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 text-left md:text-center transition-colors mb-2 md:mb-0"
+                    />
+                    <span>. I am writing to you today regarding</span>
                     <input 
                         name="subject" placeholder="subject matter" onChange={handleInput}
-                        className="mx-2 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 w-[400px] text-center"
-                    />.
-                    <br /><br />
-                    <span className="block opacity-40 text-lg md:text-xl font-mono uppercase tracking-widest mb-2">Message:</span>
-                    <textarea 
-                        name="message" required placeholder="Type your full message here..." onChange={handleInput} rows={3}
-                        className="w-full bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 resize-none"
+                        className="inline-block w-full md:w-auto md:min-w-[400px] mx-0 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 text-left md:text-center transition-colors mb-2 md:mb-0"
                     />
-                </p>
+                    <span>.</span>
+                    <br /><br />
+                    <span className="block opacity-40 text-sm md:text-xl font-mono uppercase tracking-widest mb-4 mt-4">Message:</span>
+                    <textarea 
+                        name="message" required placeholder="Type your full message here..." onChange={handleInput} rows={4}
+                        className="w-full bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 resize-none text-xl md:text-3xl leading-relaxed"
+                    />
+                </div>
             ) : (
                 // --- SERVICE TEMPLATE ---
-                <p className="font-serif text-3xl md:text-[3.5vw] text-[#0a0a0a]">
-                    Hello, I represent
+                <div className="font-serif text-2xl md:text-4xl lg:text-[3.5vw] text-[#0a0a0a]">
+                    <span>Hello, I represent</span>
                     <input 
                         name="client_name" required placeholder="Company / Client Name" onChange={handleInput}
-                        className="mx-2 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 w-[350px] text-center"
-                    />. 
-                    Our website is 
+                        className="inline-block w-full md:w-auto md:min-w-[350px] mx-0 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 text-left md:text-center transition-colors mb-2 md:mb-0"
+                    />
+                    <span>. Our website is</span> 
                     <input 
                         name="company_url" placeholder="https:// (optional)" onChange={handleInput}
-                        className="mx-2 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 w-[300px] text-center"
-                    />.
-                    <br /><br />
-                    We are looking to commission a
+                        className="inline-block w-full md:w-auto md:min-w-[300px] mx-0 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 text-left md:text-center transition-colors mb-2 md:mb-0"
+                    />
+                    <span>.</span>
+                    <br className="hidden md:block" /><br className="hidden md:block" />
+                    <span>We are looking to commission a</span>
                     <input 
                         name="service_type" required placeholder="e.g. Web Architecture" onChange={handleInput}
-                        className="mx-2 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 w-[400px] text-center"
+                        className="inline-block w-full md:w-auto md:min-w-[400px] mx-0 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 text-left md:text-center transition-colors mb-2 md:mb-0"
                     /> 
-                    project. Ideally, the final result should feel
+                    <span>project. Ideally, the final result should feel</span>
                     <input 
                         name="aesthetic_vibe" placeholder="e.g. Minimal & Cinematic" onChange={handleInput}
-                        className="mx-2 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 w-[400px] text-center"
-                    />.
-                    <br /><br />
-                    Our estimated budget for this undertaking is
+                        className="inline-block w-full md:w-auto md:min-w-[400px] mx-0 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 text-left md:text-center transition-colors mb-2 md:mb-0"
+                    />
+                    <span>.</span>
+                    <br className="hidden md:block" /><br className="hidden md:block" />
+                    <span>Our estimated budget for this undertaking is</span>
                     <select 
-                        name="budget_bracket" onChange={handleInput} className="mx-2 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] cursor-pointer appearance-none text-center w-[300px]"
+                        name="budget_bracket" onChange={handleInput} 
+                        className="inline-block w-full md:w-auto md:min-w-[300px] mx-0 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] cursor-pointer appearance-none text-left md:text-center rounded-none mb-2 md:mb-0"
                     >
                         <option value="" disabled selected>Select Range</option>
                         <option value="$10k - $25k">$10k — $25k</option>
@@ -202,38 +208,39 @@ const Contact = () => {
                         <option value="$50k - $100k">$50k — $100k</option>
                         <option value="$100k+">$100k+</option>
                     </select>
-                    and we are hoping to launch within
+                    <span>and we are hoping to launch within</span>
                     <input 
                         name="timeline" placeholder="e.g. 3 months" onChange={handleInput}
-                        className="mx-2 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 w-[250px] text-center"
-                    />.
-                    <br /><br />
-                    You can reach me at
+                        className="inline-block w-full md:w-auto md:min-w-[250px] mx-0 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 text-left md:text-center transition-colors mb-2 md:mb-0"
+                    />
+                    <span>.</span>
+                    <br className="hidden md:block" /><br className="hidden md:block" />
+                    <span>You can reach me at</span>
                     <input 
                         name="email" type="email" required placeholder="your email address" onChange={handleInput}
-                        className="mx-2 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 w-[350px] text-center"
+                        className="inline-block w-full md:w-auto md:min-w-[350px] mx-0 md:mx-4 bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 text-left md:text-center transition-colors mb-2 md:mb-0"
                     /> 
-                    to discuss the details.
+                    <span>to discuss the details.</span>
                     <br /><br />
-                    <span className="block opacity-40 text-lg md:text-xl font-mono uppercase tracking-widest mb-2">Additional Context / Goals:</span>
+                    <span className="block opacity-40 text-sm md:text-xl font-mono uppercase tracking-widest mb-4 mt-4">Additional Context / Goals:</span>
                     <textarea 
-                        name="project_goal" required placeholder="Describe the mission..." onChange={handleInput} rows={2}
-                        className="w-full bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 resize-none"
+                        name="project_goal" required placeholder="Describe the mission..." onChange={handleInput} rows={3}
+                        className="w-full bg-transparent border-b-2 border-[#0a0a0a]/20 focus:border-[#4a0404] outline-none text-[#4a0404] placeholder:text-[#0a0a0a]/20 resize-none text-xl md:text-3xl leading-relaxed"
                     />
-                </p>
+                </div>
             )}
 
             {/* SUBMIT STAMP */}
-            <div className="mt-24 flex justify-center">
+            <div className="mt-16 md:mt-24 flex justify-center pb-20">
                 <button 
                     type="submit" 
                     disabled={loading}
-                    className="group relative w-64 h-64 border border-[#0a0a0a]/10 rounded-full flex items-center justify-center overflow-hidden hover:border-[#4a0404] transition-all duration-500"
+                    className="group relative w-48 h-48 md:w-64 md:h-64 border border-[#0a0a0a]/10 rounded-full flex items-center justify-center overflow-hidden hover:border-[#4a0404] transition-all duration-500"
                 >
                     <div className="absolute inset-0 bg-[#4a0404] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[expo.out]"></div>
                     <div className="relative z-10 text-center group-hover:text-white transition-colors duration-500">
-                        <span className="font-mono text-[10px] tracking-[0.3em] uppercase block mb-2">{loading ? "Signing..." : "Authorize"}</span>
-                        <span className="font-serif text-3xl italic block">Send Brief</span>
+                        <span className="font-mono text-[9px] md:text-[10px] tracking-[0.3em] uppercase block mb-2">{loading ? "Signing..." : "Authorize"}</span>
+                        <span className="font-serif text-2xl md:text-3xl italic block">Send Brief</span>
                     </div>
                 </button>
             </div>
