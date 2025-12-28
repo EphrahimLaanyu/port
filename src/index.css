@@ -67,3 +67,9 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 } */
+
+
+.mask-image-gradient {
+  mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 100%);
+}
