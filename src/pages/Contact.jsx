@@ -135,7 +135,7 @@ const Contact = () => {
           <div className="split-pane hidden md:flex flex-col justify-between w-1/3 py-8 border-r border-[#1a1a1a]/10">
             <div>
               <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-[#4a0404] block mb-4">Fig 4.0 // Transmission</span>
-              <h2 className="font-serif text-6xl leading-[0.9]">Atelier <br /><span className="italic">Portal</span></h2>
+              <h2 className="font-serif text-6xl leading-[0.9]">Contact <br /><span className="italic">Us</span></h2>
             </div>
             <div className="space-y-4 font-mono text-[9px] uppercase tracking-widest opacity-40">
               <p>ENC_TYPE: AES-256</p>
