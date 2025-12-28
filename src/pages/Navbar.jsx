@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCondensed, setIsCondensed] = useState(false);
   const [localTime, setLocalTime] = useState("");
+  const location = useLocation();
 
   const navRef = useRef(null);
   const menuOverlayRef = useRef(null);
@@ -12,15 +14,27 @@ const Navbar = () => {
   const actionsRef = useRef(null);
   const indicatorRef = useRef(null);
 
-  // 1. CLOCK & SCROLL SENSOR
+  // 1. DYNAMIC SECTION INDICATOR LOGIC
+  const getSectionData = () => {
+    switch (location.pathname) {
+      case '/work': return { num: "02 / 03", name: "Work" };
+      case '/about': return { num: "03 / 03", name: "About" };
+      default: return { num: "01 / 03", name: "Home" };
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => {
+      // For horizontal layouts, we usually listen to the window scroll 
+      // which triggers the GSAP pin progress.
       setIsCondensed(window.scrollY > 40);
     };
 
     const timer = setInterval(() => {
       const now = new Date();
-      setLocalTime(now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+      setLocalTime(now.toLocaleTimeString('en-GB', { 
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
+      }));
     }, 1000);
 
     window.addEventListener('scroll', handleScroll);
@@ -30,7 +44,7 @@ const Navbar = () => {
     };
   }, []);
 
-  // 2. THE LIQUID DOCK ANIMATION (With increased scale)
+  // 2. THE LIQUID DOCK ANIMATION
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       if (isCondensed) {
@@ -38,8 +52,8 @@ const Navbar = () => {
 
         tl.to(navRef.current, {
           width: "auto",
-          minWidth: "550px", // ENSURES THE DOCK IS SUBSTANTIAL
-          padding: "12px 32px", // MORE GENEROUS PADDING
+          minWidth: "550px",
+          padding: "12px 32px",
           backgroundColor: "rgba(255, 255, 255, 0.6)", 
           backdropFilter: "blur(20px) saturate(160%)",
           borderRadius: "100px",
@@ -48,7 +62,7 @@ const Navbar = () => {
           boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.15)",
         })
         .to(brandRef.current, { scale: 0.9, duration: 1 }, "-=1")
-        .to(indicatorRef.current, { opacity: 1, x: 0, duration: 0.8 }, "-=0.5") // SHOW SECTION DATA
+        .to(indicatorRef.current, { opacity: 1, x: 0, duration: 0.8 }, "-=0.5")
         .to(actionsRef.current, { gap: "32px", duration: 1 }, "-=1");
 
       } else {
@@ -73,7 +87,7 @@ const Navbar = () => {
     return () => ctx.revert();
   }, [isCondensed]);
 
-  // 3. CURTAIN REVEAL
+  // 3. CURTAIN REVEAL (PORTAL)
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       if (isMenuOpen) {
@@ -82,6 +96,11 @@ const Navbar = () => {
           duration: 1.4,
           ease: "expo.inOut"
         });
+        // Stagger in links
+        gsap.fromTo(".portal-link", 
+            { y: 50, opacity: 0 }, 
+            { y: 0, opacity: 1, stagger: 0.1, duration: 1, ease: "power4.out", delay: 0.4 }
+        );
       } else {
         gsap.to(menuOverlayRef.current, {
           clipPath: "circle(0% at 90% 10%)",
@@ -102,7 +121,7 @@ const Navbar = () => {
           style={{ width: "100%", padding: "32px 48px" }}
         >
           {/* BRAND CLUSTER */}
-          <div ref={brandRef} className="group flex items-center gap-6 cursor-pointer origin-left">
+          <Link to="/" className="group flex items-center gap-6 cursor-pointer origin-left">
             <div className="flex flex-col">
               <h1 className="font-serif text-2xl tracking-tighter uppercase text-[#4a0404] font-bold">
                 J&E Maison
@@ -113,24 +132,28 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* CONDENSED ONLY DATA: SECTION INDICATOR */}
+            {/* SECTION INDICATOR */}
             <div 
               ref={indicatorRef} 
               className="hidden md:flex flex-col border-l border-[#4a0404]/20 pl-6 opacity-0 -translate-x-5"
             >
-              <span className="font-mono text-[8px] uppercase tracking-[0.3em] opacity-40">Section</span>
-              <span className="font-serif italic text-sm text-[#4a0404]">01 / 03</span>
+              <span className="font-mono text-[8px] uppercase tracking-[0.3em] opacity-40">
+                {getSectionData().name}
+              </span>
+              <span className="font-serif italic text-sm text-[#4a0404]">
+                {getSectionData().num}
+              </span>
             </div>
-          </div>
+          </Link>
 
           {/* ACTION CLUSTER */}
           <div ref={actionsRef} className="flex items-center gap-10 origin-right transition-all">
-            <button className="group relative overflow-hidden px-8 py-2.5 border border-[#4a0404]/30 rounded-full bg-white/40 backdrop-blur-md">
+            <Link to="/contact" className="group relative overflow-hidden px-8 py-2.5 border border-[#4a0404]/30 rounded-full bg-white/40 backdrop-blur-md">
               <span className="relative z-10 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#1a1a1a] group-hover:text-white transition-colors duration-500">
                 Inquiry
               </span>
               <div className="absolute inset-0 bg-[#4a0404] translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-[cubic-bezier(0.85,0,0.15,1)]"></div>
-            </button>
+            </Link>
 
             <button 
               onClick={() => setIsMenuOpen(true)}
@@ -159,15 +182,20 @@ const Navbar = () => {
         </button>
 
         <div className="flex flex-col gap-4">
-          {['Index', 'Work', 'Philosophy', 'Contact'].map((item) => (
-            <div key={item} className="overflow-hidden group">
-              <a 
-                href={`#${item.toLowerCase()}`}
+          {[
+            { label: 'Index', path: '/' },
+            { label: 'Work', path: '/work' },
+            { label: 'Philosophy', path: '/about' },
+            { label: 'Contact', path: '/contact' }
+          ].map((item) => (
+            <div key={item.label} className="overflow-hidden group portal-link opacity-0">
+              <Link 
+                to={item.path}
                 onClick={() => setIsMenuOpen(false)}
                 className="block font-serif italic text-[12vw] md:text-[8vw] leading-none text-[#EAE8E4] transition-all duration-700 hover:pl-12 hover:opacity-40"
               >
-                {item}
-              </a>
+                {item.label}
+              </Link>
             </div>
           ))}
         </div>
