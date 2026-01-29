@@ -3,54 +3,39 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Navbar from './Navbar';
 
+// Importing your specific assets
+import image1 from "../assets/image.png";
+import image2 from "../assets/WhatsApp Image 2026-01-29 at 10.14.14.jpeg";
+import image3 from "../assets/Screenshot 2026-01-29 100945.png"
+
 gsap.registerPlugin(ScrollTrigger);
 
+// Matching the data from your previous component
 const PROJECTS = [
   {
     id: "01",
-    client: "AURORA PROPERTIES",
-    title: "LUMINAL RESIDENCE",
-    type: "WEB ARCHITECTURE",
-    year: "2024",
-    description: "A digital experience designed to mirror the fluidity of high-end real estate, focusing on spatial navigation and light-play.",
-    image: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2670&auto=format&fit=crop"
+    title: "Deejay Kace",
+    category: "Music",
+    img: image1, 
+    tagline: "Redefining digital liquidity.",
+    link: "https://your-link-here.com"
   },
   {
     id: "02",
-    client: "NEON VENTURES",
-    title: "CRYPTO ATELIER",
-    type: "BLOCKCHAIN INTERFACE",
-    year: "2023",
-    description: "Developing a visual language for decentralized finance that prioritizes clarity, security, and architectural precision.",
-    image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2232&auto=format&fit=crop"
+    title: "NFCCO",
+    category: "Conservancy",
+    img: image2,
+    tagline: "Architectural soul in every pixel.",
+    link: "https://another-link.com"
   },
   {
     id: "03",
-    client: "STUDIO KINETIC",
-    title: "MOTION REEL",
-    type: "IMMERSIVE SHOWCASE",
-    year: "2024",
-    description: "An experimental folio utilizing physics-based interactions to showcase global motion design excellence.",
-    image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2670&auto=format&fit=crop"
+    title: "The j&E portfolio",
+    category: "Portfolio",
+    img:image3,
+    tagline: "Engineering the future of wellness.",
+    link: "https://third-link.com"
   },
-  {
-    id: "04",
-    client: "VELVET & CO",
-    title: "MAISON DE LUXE",
-    type: "E-COMMERCE SYSTEM",
-    year: "2024",
-    description: "A high-fashion commerce platform where every transition is choreographed to feel like a boutique fitting.",
-    image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2670&auto=format&fit=crop"
-  },
-  {
-    id: "05",
-    client: "TERRA FIRMA",
-    title: "LANDSCAPE GENOME",
-    type: "DATA VISUALIZATION",
-    year: "2023",
-    description: "Transforming complex environmental data into a readable, beautiful architectural blueprint.",
-    image: "https://images.unsplash.com/photo-1449156003053-c30670b96835?q=80&w=2670&auto=format&fit=crop"
-  }
 ];
 
 // ==============================================
@@ -81,15 +66,10 @@ const ScrambleText = ({ text, trigger }) => {
 
 const Work = () => {
   const containerRef = useRef(null);
-  const scrollLineRef = useRef(null);
   const cursorRef = useRef(null);
   const [activeScramble, setActiveScramble] = useState({});
 
-  // ==============================================
-  // 1. CUSTOM CURSOR & 3D TILT LOGIC
-  // ==============================================
   const handleMouseMove = (e) => {
-    // Move Portal Cursor
     gsap.to(cursorRef.current, {
       x: e.clientX,
       y: e.clientY,
@@ -97,7 +77,6 @@ const Work = () => {
       ease: "power2.out"
     });
 
-    // Handle 3D Tilt on Hovered Image
     const imageContainer = e.target.closest(".project-image-mask");
     if (imageContainer) {
       const rect = imageContainer.getBoundingClientRect();
@@ -131,7 +110,6 @@ const Work = () => {
 
   useLayoutEffect(() => {
     let ctx = gsap.context(() => {
-      // 2. SENSORY SCROLL PHYSICS (Stretch/Compress)
       ScrollTrigger.create({
         onUpdate: (self) => {
           const velocity = Math.abs(self.getVelocity() / 1000);
@@ -143,7 +121,6 @@ const Work = () => {
         }
       });
 
-      // 3. PARALLAX BACKDROPS (The Big Numbers)
       gsap.utils.toArray(".bg-number").forEach((num) => {
         gsap.to(num, {
           y: -200,
@@ -156,7 +133,6 @@ const Work = () => {
         });
       });
 
-      // 4. SECTION REVEALS & SCRAMBLE TRIGGER
       gsap.utils.toArray(".project-section").forEach((section, i) => {
         const image = section.querySelector(".project-image-mask");
         const details = section.querySelectorAll(".detail-item");
@@ -197,7 +173,6 @@ const Work = () => {
     >
       <Navbar />
 
-      {/* CUSTOM CURSOR PORTAL */}
       <div 
         ref={cursorRef}
         className="fixed top-0 left-0 w-20 h-20 border border-[#4a0404] rounded-full pointer-events-none z-[100] flex items-center justify-center opacity-0 scale-0 backdrop-blur-[2px] bg-[#4a0404]/5"
@@ -206,7 +181,6 @@ const Work = () => {
         <span className="font-mono text-[8px] text-[#4a0404] font-bold tracking-widest">VIEW</span>
       </div>
 
-      {/* GRAINY FILM OVERLAY (Moving Noise) */}
       <style>{`
         .work-page-container::after {
           content: "";
@@ -236,7 +210,6 @@ const Work = () => {
             key={project.id} 
             className="project-section min-h-screen w-full flex items-center justify-center p-6 md:p-24 relative"
           >
-            {/* BACKGROUND PARALLAX NUMBER */}
             <div className="bg-number absolute inset-0 flex items-center justify-center pointer-events-none z-0">
                <span className="text-[35vw] font-serif italic text-black/[0.03] select-none">
                  {project.id}
@@ -245,7 +218,6 @@ const Work = () => {
 
             <div className={`w-full max-w-7xl flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-12 md:gap-24 relative z-10`}>
               
-              {/* IMAGE COLUMN WITH 3D TILT */}
               <div 
                 className="w-full md:w-3/5 group"
                 onMouseEnter={handleImageEnter}
@@ -253,37 +225,38 @@ const Work = () => {
               >
                 <div className="project-image-mask aspect-[4/5] md:aspect-[16/10] overflow-hidden bg-[#1a1a1a] shadow-2xl">
                   <img 
-                    src={project.image} 
-                    alt={project.client} 
+                    src={project.img} 
+                    alt={project.title} 
                     className="w-full h-full object-cover opacity-90 transition-all duration-300 pointer-events-auto"
                   />
-                  {/* Chroma Aberration Simulation on Hover (via backdrop filter in CSS if desired, here just grid) */}
                   <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-20 transition-opacity duration-500 bg-[linear-gradient(to_right,#4a0404_1px,transparent_1px),linear-gradient(to_bottom,#4a0404_1px,transparent_1px)] bg-[size:20px_20px]"></div>
                 </div>
               </div>
 
-              {/* DETAILS COLUMN WITH SCRAMBLE */}
               <div className="w-full md:w-2/5 flex flex-col items-start">
                 <span className="detail-item font-mono text-[10px] uppercase tracking-[0.4em] text-[#4a0404] mb-4">
-                  <ScrambleText text={`[ REF.${project.id} / 05 ]`} trigger={activeScramble[index]} />
+                  <ScrambleText text={`[ REF.${project.id} / ${PROJECTS.length.toString().padStart(2, '0')} ]`} trigger={activeScramble[index]} />
                 </span>
                 
-                <h2 className="detail-item font-serif text-5xl md:text-7xl leading-tight mb-6">
-                  <ScrambleText text={project.client} trigger={activeScramble[index]} />
+                <h2 className="detail-item font-serif text-5xl md:text-7xl leading-tight mb-6 uppercase">
+                  <ScrambleText text={project.title} trigger={activeScramble[index]} />
                 </h2>
 
                 <div className="detail-item flex items-center gap-4 mb-8">
                   <div className="h-[1px] w-8 bg-[#1a1a1a]/40"></div>
                   <span className="font-mono text-[10px] tracking-widest uppercase opacity-60 italic">
-                    {project.type} // {project.year}
+                    {project.category} // ARCHIVE_24
                   </span>
                 </div>
 
                 <p className="detail-item font-serif text-lg leading-relaxed opacity-80 mb-10 max-w-sm">
-                  {project.description}
+                  {project.tagline}
                 </p>
 
-                <button 
+                <a 
+                  href={project.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onMouseMove={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const x = e.clientX - rect.left - rect.width / 2;
@@ -291,25 +264,24 @@ const Work = () => {
                     gsap.to(e.currentTarget, { x: x * 0.4, y: y * 0.4, duration: 0.6 });
                   }}
                   onMouseLeave={(e) => gsap.to(e.currentTarget, { x: 0, y: 0, duration: 0.6, ease: "elastic.out" })}
-                  className="detail-item group relative px-10 py-4 border border-[#1a1a1a] rounded-full overflow-hidden transition-all"
+                  className="detail-item group relative px-10 py-4 border border-[#1a1a1a] rounded-full overflow-hidden transition-all inline-block"
                 >
                   <span className="relative z-10 font-mono text-[10px] uppercase tracking-[0.3em] group-hover:text-white transition-colors duration-500">
-                    VIEW_STUDY.EXE
+                    EXPLORE_PROJECT.EXE
                   </span>
                   <div className="absolute inset-0 bg-[#4a0404] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out"></div>
-                </button>
+                </a>
               </div>
             </div>
           </section>
         ))}
       </main>
 
-      {/* FOOTER CALL TO ACTION */}
       <section className="h-screen w-full flex flex-col items-center justify-center bg-[#1a1a1a] text-[#EAE8E4] relative z-50">
           <span className="font-mono text-xs uppercase tracking-[0.5em] mb-8 opacity-40">Architectural Inquiry</span>
           <h2 className="font-serif text-[10vw] italic mb-12">System & Soul.</h2>
           <button className="px-16 py-6 border border-[#EAE8E4] rounded-full font-mono text-xs tracking-[0.4em] hover:bg-[#EAE8E4] hover:text-[#1a1a1a] transition-all duration-700">
-             START_INIT.EXE
+              CONTACT_INIT.EXE
           </button>
       </section>
     </div>
