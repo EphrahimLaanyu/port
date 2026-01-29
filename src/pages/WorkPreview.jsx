@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import image1 from "../assets/Screenshot 2026-01-29 102644.png";
 import image2 from "../assets/WhatsApp Image 2026-01-29 at 10.14.14.jpeg";
+import image3 from "../assets/mainlogo.png";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -27,7 +28,7 @@ const PROJECTS = [
     id: "03",
     title: "The j&E portfolio",
     category: "Portfolio",
-    img: "https://images.unsplash.com/photo-1519643381401-22c77e60520e?q=80&w=2670&auto=format&fit=crop",
+    img:image3,
     tagline: "Engineering the future of wellness.",
     link: "http://jemaison.xyz/"
   },
